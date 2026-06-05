@@ -5,7 +5,7 @@ test.describe('Mocking an API call', () => {
   test('mocks a fruit and does not call api', async ({ page }) => {
     // Mock the api call before navigating
     await page.route('*/**/api/v1/fruits', async (route) => {
-      const json = [{ name: 'Strawberry'a, id: 21 }];
+      const json = [{ name: 'Strawberry', id: 21 }];
       await route.fulfill({ json });
     });
     // Go to the page
