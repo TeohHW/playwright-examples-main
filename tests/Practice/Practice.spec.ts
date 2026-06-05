@@ -37,8 +37,8 @@ test('Suggestion box', async ({ page }) => {
 test('Dropdown', async ({ page }) => {
   const locators = new PracticeLocators(page);
   await locators.dropdown.click();
-  await locators.dropdown.selectOption('option2');
-  await locators.dropdown.selectOption('option2');
+  await locators.dropdown.selectOption('option1');
+  await locators.dropdown.selectOption('option3');
   await locators.dropdown.selectOption('option2');
   await expect(locators.dropdown).toHaveValue('option2');
 });

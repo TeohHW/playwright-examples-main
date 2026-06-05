@@ -2,7 +2,7 @@ import { Page } from '@playwright/test';
 
 export class PracticeLocators {
   constructor(private page: Page) {}
-
+  //Rahulshettyacademy Practice Page Locators
   // Header
   get pageHeading() {
     return this.page.getByRole('heading', { name: 'Practice Page' });
@@ -130,5 +130,20 @@ export class PracticeLocators {
   // Total Amount Text Locator
   getTotalAmountText() {
     return this.page.getByText(/Total Amount Collected/);
+  }
+
+  //Expandtesting Locators
+  get usernameTextbox() {
+    return this.page.getByRole('textbox', { name: 'Username' });
+  }
+
+  get passwordTextbox() {
+    return this.page.getByRole('textbox', { name: 'Password' });
+  }
+  get loginButton() {
+    return this.page.getByRole('button', { name: 'Login' });
+  }
+  get productList() {
+    return this.page.locator('a.card:visible');
   }
 }
