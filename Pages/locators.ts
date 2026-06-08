@@ -146,4 +146,121 @@ export class PracticeLocators {
   get productList() {
     return this.page.locator('a.card:visible');
   }
+
+  // Shopping Page Locators
+  get productCard() {
+    return this.page.locator('a.card:visible');
+  }
+
+  get minSlider() {
+    return this.page.locator('span[role=slider].ngx-slider-pointer-min');
+  }
+
+  get maxSlider() {
+    return this.page.locator('span[role=slider].ngx-slider-pointer-max');
+  }
+
+  get searchQueryInput() {
+    return this.page.locator('[data-test="search-query"]');
+  }
+
+  get searchSubmitButton() {
+    return this.page.locator('[data-test="search-submit"]');
+  }
+
+  get searchResultCount() {
+    return this.page.getByTestId('search-result-count');
+  }
+
+  get productName() {
+    return this.page.locator('[data-test="product-name"]');
+  }
+
+  get filtersSection() {
+    return this.page.locator('#filters');
+  }
+
+  get navCategories() {
+    return this.page.locator('[data-test="nav-categories"]');
+  }
+
+  get navRentals() {
+    return this.page.locator('[data-test="nav-rentals"]');
+  }
+
+  get pageTitle() {
+    return this.page.locator('[data-test="page-title"]');
+  }
+
+  get navContact() {
+    return this.page.locator('[data-test="nav-contact"]');
+  }
+
+  get contactSubmitButton() {
+    return this.page.locator('[data-test="contact-submit"]');
+  }
+
+  get firstNameInput() {
+    return this.page.locator('[data-test="first-name"]');
+  }
+
+  get lastNameInput() {
+    return this.page.locator('[data-test="last-name"]');
+  }
+
+  get emailInput() {
+    return this.page.locator('[data-test="email"]');
+  }
+
+  get subjectSelect() {
+    return this.page.locator('[data-test="subject"]');
+  }
+
+  get subjectError() {
+    return this.page.locator('[data-test="subject-error"]');
+  }
+
+  get messageInput() {
+    return this.page.locator('[data-test="message"]');
+  }
+
+  get fileInput() {
+    return this.page.locator('input[type="file"]');
+  }
+
+  get navSignIn() {
+    return this.page.locator('[data-test="nav-sign-in"]');
+  }
+
+  get registerLink() {
+    return this.page.locator('[data-test="register-link"]');
+  }
+
+  get registerSubmitButton() {
+    return this.page.locator('[data-test="register-submit"]');
+  }
+
+  get compareLink() {
+    return this.page.locator('[data-test="compare-link"]');
+  }
+
+  get compareButton() {
+    return this.page.locator('.compare-btn');
+  }
+
+  get cardTitle() {
+    return this.page.locator('.card-title');
+  }
+
+  get clearComparisonButton() {
+    return this.page.locator('[data-test="clear-comparison"]');
+  }
+
+  getFilterByText(text: string) {
+    return this.page.getByText(text);
+  }
+
+  getErrorMessage(text: string) {
+    return this.page.getByText(text);
+  }
 }

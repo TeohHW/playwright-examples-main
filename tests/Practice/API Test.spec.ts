@@ -15,7 +15,7 @@ test('List Specific Resources', async ({ page }) => {
    expect(response.status()).toBe(200);
    console.log(json);
 });
-test('filter Resources', async ({ page }) => {
+test('Filter Resources', async ({ page }) => {
    await page.goto('https://jsonplaceholder.typicode.com/posts?userId=1');
    const response = await page.request.get('https://jsonplaceholder.typicode.com/posts?userId=1');
     const json     = await response.json();
