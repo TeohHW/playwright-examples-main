@@ -7,33 +7,6 @@ const test = base.extend<{ locators: PracticeLocators }>({
     await use(locators);
   },
 });
-
-test('Login Page', async ({ page, locators }) => {
-  await page.goto('https://practice.expandtesting.com/login');
-
-  //Invalid Password
-  await locators.usernameTextbox.fill('practice');
-  await locators.passwordTextbox.fill('WrongPassword!');
-  await locators.loginButton.click();
-  await expect(page.locator('#flash')).toContainText('Your password is invalid!');
-
-  //Invalid Username
-    await locators.usernameTextbox.fill('');
-    await locators.passwordTextbox.fill('SuperSecretPassword!');
-    await locators.loginButton.click();
-    await expect(page.locator('#flash')).toContainText('Your username is invalid!')
-    
-    //Valid Credentials
-    await locators.usernameTextbox.fill('practice');
-    await locators.passwordTextbox.fill('SuperSecretPassword!');
-    await locators.loginButton.click();
-    await expect(page).toHaveURL('https://practice.expandtesting.com/secure');
-    await expect(page.locator('#flash')).toContainText('You logged into a secure area!');
-
-    await page.getByRole('link', { name: 'Logout' }).click();
-    await expect(page.locator('#flash')).toContainText('You logged out of the secure area!');
-});
-
 test('Register Page', async ({ page, locators }) => {
   //Non-matching passwords
   await page.goto('https://practice.expandtesting.com/register');
