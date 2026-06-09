@@ -223,7 +223,6 @@ test("Registration - JSON", async ({ page, locators }) => {
   await locators.navSignIn.click();
   await locators.registerLink.click();
   
-  // Fill form
   await page.locator('[data-test="first-name"]').fill(testDataJson.user1.firstName);
   await page.locator('[data-test="last-name"]').fill(testDataJson.user1.lastName);
   await page.locator('[data-test="dob"]').fill(testDataJson.user1.dob);
@@ -232,31 +231,33 @@ test("Registration - JSON", async ({ page, locators }) => {
   await page.locator('[data-test="phone"]').fill(testDataJson.user1.phone);
   await page.locator('[data-test="country"]').selectOption(testDataJson.user1.country);
   
-  // Wait for postal code validation to complete
+  const randomId = Math.random().toString(36).substring(2, 8);
+  testDataJson.user1.email = 'johndoe' + randomId + '@test.com';
+  await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
+  
+  // Wait for postal code address generation to complete
   await page.locator('[data-test="register-submit"]').isEnabled();
   
-  // Generate random email and update test data
-  const randomId = Math.random().toString(36).substring(2, 8);
-  const testEmail = `johndoe${randomId}@test.com`;
-  testDataJson.user1.email = testEmail;
-  
-  // Fill email and password
-  await page.locator('[data-test="email"]').fill(testEmail);
+  // Type password and wait for strength validation
   await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
-  await page.waitForTimeout(1500); // Wait for password strength validation
+  await page.waitForTimeout(1500); // Wait for strength gauge
   
   // Submit registration
   await page.locator('[data-test="register-submit"]').click();
   await page.waitForLoadState('networkidle');
-
+  
   // Login
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
-  await page.locator('[data-test="email"]').fill(testEmail);
+  await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
   await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
-  await page.waitForTimeout(1500); // Wait for password strength validation
   
-  await page.locator('[data-test="
-
+  await page.locator('[data-test="login-submit"]').click();
+  await page.waitForLoadState('networkidle');
+  
+  await expect(page.locator('[data-test="page-title"]')).toContainText("My account", { timeout: 10000 });
+  await page.locator('[data-test="nav-menu"]').click();
+  await page.locator('[data-test="nav-sign-out"]').click();
+});
 test("Registration - TypeScript Data", async ({ page, locators }) => {
   await locators.navSignIn.click();
   await locators.registerLink.click();
@@ -269,8 +270,8 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   await page.locator('[data-test="phone"]').fill(loginCredentials.user1.phone);
   await page.locator('[data-test="country"]').selectOption(loginCredentials.user1.country);
   
-  const randomId = Math.random().toString(36).substring(2, 5);
-  loginCredentials.user1.email = `johndoe${randomId}@hotmail.com`;
+  const randomId = Math.random().toString(36).substring(2, 8);
+  loginCredentials.user1.email = 'johndoe' + randomId + '@test.com';
   await page.locator('[data-test="email"]').fill(loginCredentials.user1.email);
   
   // Wait for postal code address generation to complete
