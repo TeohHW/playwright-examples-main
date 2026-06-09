@@ -105,18 +105,25 @@ test("Go to page and select product", async ({ page, locators }) => {
 });
 
 test("Sort and select product", async ({ page, locators }) => {
-  await page.locator('[data-test="sort"]').selectOption("price,desc");
+  // Capture BEFORE sorting so we have a baseline to compare against
+  await page.waitForSelector("a.card");
   const firstHrefBefore = await locators.productCard.nth(3).getAttribute("href");
+  console.log("Before sort href:", firstHrefBefore);
+
+  await page.locator('[data-test="sort"]').selectOption("price,desc");
+
+  // Now wait for the product list to update
   await expect(async () => {
     const firstHrefAfter = await locators.productCard.nth(3).getAttribute("href");
+    console.log("After sort href:", firstHrefAfter);
     expect(firstHrefAfter).not.toBe(firstHrefBefore);
   }).toPass({ timeout: 15000 });
+
   const productName = await locators.productName.nth(6).innerText();
   console.log(`Product : ${productName}`);
-  await expect(locators.productCard.nth(6)).toBeVisible();
+  await expect(locators.productCard.nth(6)).toBeVisible({ timeout: 15000 });
   await locators.productCard.nth(6).click();
 });
-
 test("Filter category using dropdown and click first result", async ({ page, locators }) => {
   await locators.navCategories.click();
   await locators.navRentals.click();
@@ -273,6 +280,8 @@ test("Registration - JSON", async ({ page, locators }) => {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('load');
   await page.waitForLoadState('networkidle');
+   // Add explicit wait for the login heading instead of just networkidle
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 20000 });
   console.log("Current URL:", page.url());
   const headingJson = await page.locator('h1, h2, h3').first().innerText().catch(() => 'no heading found');
   console.log("Page heading found:", headingJson);
@@ -350,6 +359,8 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   await page.waitForLoadState('load');
   await page.waitForLoadState('networkidle');
   console.log("Current URL:", page.url());
+  // Add explicit wait for the login heading instead of just networkidle
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 20000 });
   const headingTs = await page.locator('h1, h2, h3').first().innerText().catch(() => 'no heading found');
   console.log("Page heading found:", headingTs);
 
