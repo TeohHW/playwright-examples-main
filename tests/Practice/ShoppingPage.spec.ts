@@ -220,9 +220,10 @@ test("Compare products", async ({ page, locators }) => {
   ).toBeVisible();
 });
 test("Registration - JSON", async ({ page, locators }) => {
+  console.log("Able to hit page");
   await locators.navSignIn.click();
   await locators.registerLink.click();
-
+  console.log("Registration page");
   await page.locator('[data-test="first-name"]').fill(testDataJson.user1.firstName);
   await page.locator('[data-test="last-name"]').fill(testDataJson.user1.lastName);
   await page.locator('[data-test="dob"]').fill(testDataJson.user1.dob);
@@ -236,24 +237,25 @@ test("Registration - JSON", async ({ page, locators }) => {
 
   await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
   await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password, { delay: 200 });
-
+  console.log("Form filled in");
   await page.locator('[data-test="register-submit"]').click();
   await page.waitForURL('**/auth/login');
-
+  console.log("Redirect to login");
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(testDataJson.user1.password);
   await page.locator('[data-test="login-submit"]').click();
   await page.waitForURL('**/account');
-
+  console.log("Account page");
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
 
 test("Registration - TypeScript Data", async ({ page, locators }) => {
+  console.log("Able to hit page");
   await locators.navSignIn.click();
   await locators.registerLink.click();
-
+  console.log("On Registration page");
   await page.locator('[data-test="first-name"]').fill(loginCredentials.user1.firstName);
   await page.locator('[data-test="last-name"]').fill(loginCredentials.user1.lastName);
   await page.locator('[data-test="dob"]').fill(loginCredentials.user1.dob);
@@ -267,16 +269,16 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
 
   await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
   await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password, { delay: 200 });
-
+  console.log("Form filled in");
   await page.locator('[data-test="register-submit"]').click();
   await page.waitForURL('**/auth/login');
-
+  console.log("Redirect to login");
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(loginCredentials.user1.password);
   await page.locator('[data-test="login-submit"]').click();
   await page.waitForURL('**/account');
-
+  console.log("Account page");
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
