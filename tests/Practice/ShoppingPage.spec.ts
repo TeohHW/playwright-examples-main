@@ -11,10 +11,19 @@ const test = base.extend<{ locators: PracticeLocators }>({
 });
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("https://practicesoftwaretesting.com/", { 
-    waitUntil: 'domcontentloaded',  // faster than default 'load'
-    timeout: 60000 
-})});
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await page.goto("https://practicesoftwaretesting.com/", {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      });
+      await expect(page.locator('[data-test="nav-home"]')).toBeVisible({ timeout: 15000 });
+      break;
+    } catch (e) {
+      if (attempt === 3) throw e;
+    }
+  }
+});
 
 test("Click first product", async ({ page, locators }) => {
   await page.waitForSelector("a.card");
@@ -23,13 +32,8 @@ test("Click first product", async ({ page, locators }) => {
   await expect(page).toHaveURL(/\/product\//);
 });
 
-test("Interact with min slider and click first result", async ({
-  page,
-  locators,
-}) => {
-  const firstHrefBefore = await locators.productCard
-    .first()
-    .getAttribute("href");
+test("Interact with min slider and click first result", async ({ page, locators }) => {
+  const firstHrefBefore = await locators.productCard.first().getAttribute("href");
   await page.waitForSelector("ngx-slider");
   const minHandle = locators.minSlider;
   const maxHandle = locators.maxSlider;
@@ -40,10 +44,9 @@ test("Interact with min slider and click first result", async ({
   if (minBox) {
     const startX = minBox.x + minBox.width / 2;
     const startY = minBox.y + minBox.height / 2;
-    const endX = startX + 90;
     await page.mouse.move(startX, startY);
     await page.mouse.down();
-    await page.mouse.move(endX, startY, { steps: 10 });
+    await page.mouse.move(startX + 90, startY, { steps: 10 });
     await page.mouse.up();
   }
 
@@ -51,18 +54,17 @@ test("Interact with min slider and click first result", async ({
   if (maxBox) {
     const startX = maxBox.x + maxBox.width / 2;
     const startY = maxBox.y + maxBox.height / 2;
-    const endX = startX + 90;
     await page.mouse.move(startX, startY);
     await page.mouse.down();
-    await page.mouse.move(endX, startY, { steps: 10 });
+    await page.mouse.move(startX + 90, startY, { steps: 10 });
     await page.mouse.up();
   }
+
   await expect(async () => {
-    const firstHrefAfter = await locators.productCard
-      .first()
-      .getAttribute("href");
+    const firstHrefAfter = await locators.productCard.first().getAttribute("href");
     expect(firstHrefAfter).not.toBe(firstHrefBefore);
   }).toPass();
+
   await locators.productCard.first().click();
   await expect(page).toHaveURL(/\/product\//);
 });
@@ -70,75 +72,52 @@ test("Interact with min slider and click first result", async ({
 test("Add search term and click first result", async ({ page, locators }) => {
   await locators.searchQueryInput.fill("Washers");
   await locators.searchSubmitButton.click();
-  await expect(locators.searchResultCount).toContainText(
-    "1 product found for 'Washers'",
-    { timeout: 30000 }
-  );
+  await expect(locators.searchResultCount).toContainText("1 product found for 'Washers'");
   await expect(locators.productName).toContainText("Washers");
   await locators.productCard.first().click();
 });
 
-test("Filter using checkbox and click 4th result", async ({
-  page,
-  locators,
-}) => {
-  const firstHrefBefore = await locators.productCard
-    .nth(3)
-    .getAttribute("href");
+test("Filter using checkbox and click 4th result", async ({ page, locators }) => {
+  const firstHrefBefore = await locators.productCard.nth(3).getAttribute("href");
   await locators.filtersSection.getByText("Hammer").click();
   await locators.getFilterByText("Grinder").click();
   await expect(async () => {
-    const firstHrefAfter = await locators.productCard
-      .nth(3)
-      .getAttribute("href");
+    const firstHrefAfter = await locators.productCard.nth(3).getAttribute("href");
     expect(firstHrefAfter).not.toBe(firstHrefBefore);
   }).toPass();
   const productName = await locators.productName.nth(3).innerText();
-  console.log(`Product: ${productName}`);
+  console.log(`Product : ${productName}`);
   await expect(locators.productCard.nth(3)).toBeVisible();
   await locators.productCard.nth(3).click();
 });
 
 test("Go to page and select product", async ({ page, locators }) => {
-  const firstHrefBefore = await locators.productCard
-    .nth(3)
-    .getAttribute("href");
+  const firstHrefBefore = await locators.productCard.nth(3).getAttribute("href");
   await page.getByRole("button", { name: "Page-3" }).click();
   await expect(async () => {
-    const firstHrefAfter = await locators.productCard
-      .nth(3)
-      .getAttribute("href");
+    const firstHrefAfter = await locators.productCard.nth(3).getAttribute("href");
     expect(firstHrefAfter).not.toBe(firstHrefBefore);
   }).toPass();
   const productName = await locators.productName.nth(3).innerText();
-  console.log(`Product: ${productName}`);
+  console.log(`Product : ${productName}`);
   await expect(locators.productCard.nth(3)).toBeVisible();
   await locators.productCard.nth(3).click();
 });
 
 test("Sort and select product", async ({ page, locators }) => {
-  test.setTimeout(120000);
-  await page.locator('[data-test="sort"]').click();
   await page.locator('[data-test="sort"]').selectOption("price,desc");
-  const firstHrefBefore = await locators.productCard
-    .nth(3)
-    .getAttribute("href");
+  const firstHrefBefore = await locators.productCard.nth(3).getAttribute("href");
   await expect(async () => {
-    const firstHrefAfter = await locators.productCard
-      .nth(3)
-      .getAttribute("href");
+    const firstHrefAfter = await locators.productCard.nth(3).getAttribute("href");
     expect(firstHrefAfter).not.toBe(firstHrefBefore);
-  }).toPass();
+  }).toPass({ timeout: 15000 });
   const productName = await locators.productName.nth(6).innerText();
-  console.log(`Product: ${productName}`);
+  console.log(`Product : ${productName}`);
   await expect(locators.productCard.nth(6)).toBeVisible();
   await locators.productCard.nth(6).click();
 });
 
-test("Filter category using dropdown and click first result", async ({
-  page,
-  locators,
-}) => {
+test("Filter category using dropdown and click first result", async ({ page, locators }) => {
   await locators.navCategories.click();
   await locators.navRentals.click();
   await expect(locators.pageTitle).toContainText("Rentals");
@@ -146,51 +125,74 @@ test("Filter category using dropdown and click first result", async ({
   await expect(locators.productName).toBeVisible();
 });
 
-test("Click submit without filling contact form", async ({
-  page,
-  locators,
-}) => {
+test("Click submit without filling contact form", async ({ page, locators }) => {
   await locators.navContact.click();
+  await page.waitForURL('**/contact');
+  await page.waitForLoadState('domcontentloaded');
   await locators.contactSubmitButton.click();
-  await expect(
-    locators.getErrorMessage("First name is required"),
-  ).toBeVisible();
-  await expect(locators.getErrorMessage("Last name is required")).toBeVisible();
-  await expect(locators.getErrorMessage("Email is required")).toBeVisible();
-  await expect(locators.subjectError).toContainText("Subject is required");
+  await expect(locators.getErrorMessage("First name is required")).toBeVisible({ timeout: 15000 });
+  await expect(locators.getErrorMessage("Last name is required")).toBeVisible({ timeout: 15000 });
+  await expect(locators.getErrorMessage("Email is required")).toBeVisible({ timeout: 15000 });
+  await expect(locators.subjectError).toContainText("Subject is required", { timeout: 15000 });
 });
 
 test("Contact Form - JSON", async ({ page, locators }) => {
-  test.setTimeout(60000);
   await locators.navContact.click();
+  await page.waitForURL('**/contact');
+  await page.waitForLoadState('domcontentloaded');
+  await expect(locators.firstNameInput).toBeVisible({ timeout: 15000 });
+
   await locators.firstNameInput.fill(testDataJson.user1.firstName);
+  await expect(locators.firstNameInput).toHaveValue(testDataJson.user1.firstName);
+
   await locators.lastNameInput.fill(testDataJson.user1.lastName);
+  await expect(locators.lastNameInput).toHaveValue(testDataJson.user1.lastName);
+
   await locators.emailInput.fill(testDataJson.user1.email);
+  await expect(locators.emailInput).toHaveValue(testDataJson.user1.email);
+
   await locators.subjectSelect.selectOption("payments");
   await locators.messageInput.fill(testDataJson.user1.message);
+  await expect(locators.messageInput).toHaveValue(testDataJson.user1.message);
+
   await locators.fileInput.setInputFiles("tests/UploadFileTest.txt");
   await locators.contactSubmitButton.click();
+
   await expect(page.getByRole("alert")).toContainText(
     "Thanks for your message! We will contact you shortly.",
+    { timeout: 15000 }
   );
 });
 
 test("Contact Form - TypeScript", async ({ page, locators }) => {
   await locators.navContact.click();
+  await page.waitForURL('**/contact');
+  await page.waitForLoadState('domcontentloaded');
+  await expect(locators.firstNameInput).toBeVisible({ timeout: 15000 });
+
   await locators.firstNameInput.fill(loginCredentials.user1.firstName);
+  await expect(locators.firstNameInput).toHaveValue(loginCredentials.user1.firstName);
+
   await locators.lastNameInput.fill(loginCredentials.user1.lastName);
+  await expect(locators.lastNameInput).toHaveValue(loginCredentials.user1.lastName);
+
   await locators.emailInput.fill(loginCredentials.user1.email);
+  await expect(locators.emailInput).toHaveValue(loginCredentials.user1.email);
+
   await locators.subjectSelect.selectOption("payments");
   await locators.messageInput.fill(loginCredentials.user1.message);
+  await expect(locators.messageInput).toHaveValue(loginCredentials.user1.message);
+
   await locators.fileInput.setInputFiles("tests/UploadFileTest.txt");
   await locators.contactSubmitButton.click();
+
   await expect(page.getByRole("alert")).toContainText(
     "Thanks for your message! We will contact you shortly.",
+    { timeout: 15000 }
   );
 });
 
 test("Compare products", async ({ page, locators }) => {
-
   await page.waitForSelector("a.card");
   const selectedItems = [];
   const positions = [1, 4, 7];
@@ -207,18 +209,16 @@ test("Compare products", async ({ page, locators }) => {
   const allProducts = locators.productName;
   await allProducts.first().waitFor({ state: "visible" });
   const count = await allProducts.count();
-  console.log(`Items selected: ${count}`);
-  
+  console.log(`Item(s) selected: ${count}`);
+
   for (let i = 0; i < count; i++) {
     const productName = await allProducts.nth(i).innerText();
     console.log(`Product ${i + 1}: ${productName}`);
     await expect(allProducts.nth(i)).toContainText(selectedItems[i]);
   }
-  
+
   await locators.clearComparisonButton.click();
-  await expect(
-    locators.getErrorMessage("No products selected for"),
-  ).toBeVisible();
+  await expect(locators.getErrorMessage("No products selected for")).toBeVisible();
 });
 
 test("Registration - JSON", async ({ page, locators }) => {
@@ -266,9 +266,12 @@ test("Registration - JSON", async ({ page, locators }) => {
   await page.waitForLoadState('networkidle');
   console.log("Form filled in");
 
-  page.waitForURL('**/auth/login', { timeout: 30000 }),
-  page.locator('[data-test="register-submit"]').click(),
+  await Promise.all([
+    page.waitForURL('**/auth/login', { timeout: 30000 }),
+    page.locator('[data-test="register-submit"]').click(),
+  ]);
   console.log("Redirect to login");
+
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('load');
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
@@ -277,9 +280,10 @@ test("Registration - JSON", async ({ page, locators }) => {
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(testDataJson.user1.password);
 
-  page.waitForURL('**/account', { timeout: 30000 }),
-  page.locator('[data-test="login-submit"]').click(),
-
+  await Promise.all([
+    page.waitForURL('**/account', { timeout: 30000 }),
+    page.locator('[data-test="login-submit"]').click(),
+  ]);
   console.log("Account page");
 
   await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 15000 });
@@ -334,21 +338,29 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   await page.waitForLoadState('networkidle');
   console.log("Form filled - submit enabled");
 
-
-  page.waitForURL('**/auth/login', { timeout: 30000 }),
-  page.locator('[data-test="register-submit"]').click(),
+  await Promise.all([
+    page.waitForURL('**/auth/login', { timeout: 30000 }),
+    page.locator('[data-test="register-submit"]').click(),
+  ]);
   console.log("Redirected to login");
+
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('load');
-
+  // Log current URL and heading for debugging
+  console.log("Current URL:", page.url());
+  const heading = await page.locator('h1, h2, h3').first().innerText().catch(() => 'no heading found');
+  console.log("Page heading found:", heading);
+  
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
   await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 15000 });
 
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(loginCredentials.user1.password);
 
-  page.waitForURL('**/account', { timeout: 30000 }),
-  page.locator('[data-test="login-submit"]').click(),
+  await Promise.all([
+    page.waitForURL('**/account', { timeout: 30000 }),
+    page.locator('[data-test="login-submit"]').click(),
+  ]);
   console.log("Account page");
 
   await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 15000 });
