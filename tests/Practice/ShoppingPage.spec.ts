@@ -12,7 +12,9 @@ const test = base.extend<{ locators: PracticeLocators }>({
 
 test.beforeEach(async ({ page }) => {
   await page.goto("https://practicesoftwaretesting.com/");
-  await expect(page.getByRole('link', { name: 'Practice Software Testing -' })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Practice Software Testing -" }),
+  ).toBeVisible();
 });
 
 test("Click first product", async ({ page, locators }) => {
@@ -223,10 +225,9 @@ test("Compare products", async ({ page, locators }) => {
 test("Registration - JSON", async ({ page, locators }) => {
   console.log("Able to hit page");
   await locators.navSignIn.click();
-  // Wait for login page to load before clicking register
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+
   await locators.registerLink.click();
-  // Wait for registration form to load before filling fields
   await expect(
     page.getByRole("heading", { name: "Customer registration" }),
   ).toBeVisible();
@@ -274,14 +275,14 @@ test("Registration - JSON", async ({ page, locators }) => {
 test("Registration - TypeScript Data", async ({ page, locators }) => {
   console.log("Able to hit page");
   await locators.navSignIn.click();
-  // Wait for login page to load before clicking register
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+
   await locators.registerLink.click();
-  // Wait for registration form to load before filling fields
   await expect(
     page.getByRole("heading", { name: "Customer registration" }),
   ).toBeVisible();
   console.log("Registration page loaded");
+
   await page
     .locator('[data-test="first-name"]')
     .fill(loginCredentials.user1.firstName);
@@ -303,22 +304,28 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
   await page.locator('[data-test="email"]').fill(uniqueEmail);
 
-  await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
+  // Type password FIRST, then verify submit becomes enabled
   await page
     .locator('[data-test="password"]')
     .pressSequentially(loginCredentials.user1.password, { delay: 200 });
-  console.log("Form filled in");
+  await expect(page.locator('[data-test="register-submit"]')).toBeEnabled({
+    timeout: 10000,
+  });
+  console.log("Form filled - submit enabled");
+
   await page.locator('[data-test="register-submit"]').click();
-  await page.waitForURL("**/auth/login");
-  console.log("Redirect to login");
+  await page.waitForURL("**/auth/login", { timeout: 30000 });
+  console.log("Redirected to login");
+
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page
     .locator('[data-test="password"]')
     .fill(loginCredentials.user1.password);
   await page.locator('[data-test="login-submit"]').click();
-  await page.waitForURL("**/account");
+  await page.waitForURL("**/account", { timeout: 30000 });
   console.log("Account page");
+
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
