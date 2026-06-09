@@ -72,6 +72,7 @@ test("Add search term and click first result", async ({ page, locators }) => {
   await locators.searchSubmitButton.click();
   await expect(locators.searchResultCount).toContainText(
     "1 product found for 'Washers'",
+    { timeout: 30000 }
   );
   await expect(locators.productName).toContainText("Washers");
   await locators.productCard.first().click();

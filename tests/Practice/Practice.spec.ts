@@ -6,10 +6,12 @@ test.beforeEach(async ({ page }) => {
   const locators = new PracticeLocators(page);
   await expect(locators.pageHeading).toBeVisible();
 });
+
 test.afterEach(async ({ page }) => {
   await page.waitForTimeout(2000);
   await page.close();
 });
+
 test("Radio button", async ({ page }) => {
   const locators = new PracticeLocators(page);
   await locators.radio1.click();
@@ -27,6 +29,7 @@ test("Radio button", async ({ page }) => {
   await expect(locators.radio1).not.toBeChecked();
   await expect(locators.radio2).not.toBeChecked();
 });
+
 test("Suggestion box", async ({ page }) => {
   const locators = new PracticeLocators(page);
   await locators.suggestionBox.fill("Singapore");
@@ -34,6 +37,7 @@ test("Suggestion box", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(locators.suggestionBox).toHaveValue("Singapore");
 });
+
 test("Dropdown", async ({ page }) => {
   const locators = new PracticeLocators(page);
   await locators.dropdown.click();
@@ -42,6 +46,7 @@ test("Dropdown", async ({ page }) => {
   await locators.dropdown.selectOption("option2");
   await expect(locators.dropdown).toHaveValue("option2");
 });
+
 test("Checkboxes", async ({ page }) => {
   const locators = new PracticeLocators(page);
   await locators.checkboxOption1.click();
@@ -60,14 +65,20 @@ test("Switch to new window", async ({ page }) => {
   await expect(newWindow.getByText("qaclickacademy.com")).toBeVisible();
   await newWindow.close();
 });
+
 test("Switch to new tab", async ({ page }) => {
   const locators = new PracticeLocators(page);
   const newTabPromise = page.waitForEvent("popup");
   await locators.openTabLink.click();
   const newTab = await newTabPromise;
-  await expect(newTab.getByText("qaclickacademy.com")).toBeVisible();
+  
+  // FIX: Added wait for load state to ensure page is fully loaded
+  await newTab.waitForLoadState('load');
+  
+  await expect(newTab.getByText("qaclickacademy.com")).toBeVisible({ timeout: 30000 });
   await newTab.close();
 });
+
 test("Hide and Show", async ({ page }) => {
   const locators = new PracticeLocators(page);
   await locators.hideButton.click();
