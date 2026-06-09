@@ -12,6 +12,7 @@ const test = base.extend<{ locators: PracticeLocators }>({
 
 test.beforeEach(async ({ page }) => {
   await page.goto("https://practicesoftwaretesting.com/");
+  await expect(page.getByRole('link', { name: 'Practice Software Testing -' })).toBeVisible();
 });
 
 test("Click first product", async ({ page, locators }) => {
