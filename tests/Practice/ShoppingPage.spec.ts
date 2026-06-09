@@ -222,7 +222,7 @@ test("Compare products", async ({ page, locators }) => {
 test("Registration - JSON", async ({ page, locators }) => {
   await locators.navSignIn.click();
   await locators.registerLink.click();
-  
+
   await page.locator('[data-test="first-name"]').fill(testDataJson.user1.firstName);
   await page.locator('[data-test="last-name"]').fill(testDataJson.user1.lastName);
   await page.locator('[data-test="dob"]').fill(testDataJson.user1.dob);
@@ -230,37 +230,30 @@ test("Registration - JSON", async ({ page, locators }) => {
   await page.locator('[data-test="house_number"]').fill(testDataJson.user1.houseNo);
   await page.locator('[data-test="phone"]').fill(testDataJson.user1.phone);
   await page.locator('[data-test="country"]').selectOption(testDataJson.user1.country);
-  
-  const randomId = Math.random().toString(36).substring(2, 8);
-  testDataJson.user1.email = 'johndoe' + randomId + '@test.com';
-  await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
-  
-  // Wait for postal code address generation to complete
-  await page.locator('[data-test="register-submit"]').isEnabled();
-  
-  // Type password and wait for strength validation
-  await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
-  await page.waitForTimeout(2500); // Wait for strength gauge
-  
-  // Submit registration
+
+  const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
+  await page.locator('[data-test="email"]').fill(uniqueEmail);
+
+  await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
+  await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password, { delay: 200 });
+
   await page.locator('[data-test="register-submit"]').click();
-  await page.waitForLoadState('networkidle');
   await page.waitForURL('**/auth/login');
-  // Login
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
-  await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
-  await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
-  
+
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+  await page.locator('[data-test="email"]').fill(uniqueEmail);
+  await page.locator('[data-test="password"]').fill(testDataJson.user1.password);
   await page.locator('[data-test="login-submit"]').click();
-  await page.waitForLoadState('networkidle');
   await page.waitForURL('**/account');
+
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
+
 test("Registration - TypeScript Data", async ({ page, locators }) => {
   await locators.navSignIn.click();
   await locators.registerLink.click();
-  
+
   await page.locator('[data-test="first-name"]').fill(loginCredentials.user1.firstName);
   await page.locator('[data-test="last-name"]').fill(loginCredentials.user1.lastName);
   await page.locator('[data-test="dob"]').fill(loginCredentials.user1.dob);
@@ -268,30 +261,22 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   await page.locator('[data-test="house_number"]').fill(loginCredentials.user1.houseNo);
   await page.locator('[data-test="phone"]').fill(loginCredentials.user1.phone);
   await page.locator('[data-test="country"]').selectOption(loginCredentials.user1.country);
-  
-  const randomId = Math.random().toString(36).substring(2, 8);
-  loginCredentials.user1.email = 'johndoe' + randomId + '@test.com';
-  await page.locator('[data-test="email"]').fill(loginCredentials.user1.email);
-  
-  // Wait for postal code address generation to complete
-  await page.locator('[data-test="register-submit"]').isEnabled();
-  
-  // Type password and wait for strength validation
-  await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password);
-  await page.waitForTimeout(2500); // Wait for strength gauge
-  
-  // Submit registration
+
+  const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
+  await page.locator('[data-test="email"]').fill(uniqueEmail);
+
+  await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
+  await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password, { delay: 200 });
+
   await page.locator('[data-test="register-submit"]').click();
-  await page.waitForLoadState('networkidle');
   await page.waitForURL('**/auth/login');
-  // Login
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
-  await page.locator('[data-test="email"]').fill(loginCredentials.user1.email);
-  await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password);
-  
+
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+  await page.locator('[data-test="email"]').fill(uniqueEmail);
+  await page.locator('[data-test="password"]').fill(loginCredentials.user1.password);
   await page.locator('[data-test="login-submit"]').click();
-  await page.waitForLoadState('networkidle');
   await page.waitForURL('**/account');
+
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
