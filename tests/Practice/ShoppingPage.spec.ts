@@ -32,7 +32,6 @@ test("Interact with min slider and click first result", async ({
   const firstHrefBefore = await locators.productCard
     .first()
     .getAttribute("href");
-  console.log("First product href before slider interaction:", firstHrefBefore);
   await page.waitForSelector("ngx-slider");
   const minHandle = locators.minSlider;
   const maxHandle = locators.maxSlider;
@@ -67,7 +66,6 @@ test("Interact with min slider and click first result", async ({
       .first()
       .getAttribute("href");
     expect(firstHrefAfter).not.toBe(firstHrefBefore);
-    console.log("First product href after slider interaction:", firstHrefAfter);
   }).toPass();
   await locators.productCard.first().click();
   await expect(page).toHaveURL(/\/product\//);
@@ -104,16 +102,6 @@ test("Filter using checkbox and click 4th result", async ({
   await expect(locators.productCard.nth(3)).toBeVisible();
   await locators.productCard.nth(3).click();
 });
-test("Filter category using dropdown and click first result", async ({
-  page,
-  locators,
-}) => {
-  await locators.navCategories.click();
-  await locators.navRentals.click();
-  await expect(locators.pageTitle).toContainText("Rentals");
-  await locators.getFilterByText("Heavy-duty tracked excavator").click();
-  await expect(locators.productName).toBeVisible();
-});
 test("Go to page and select product", async ({ page, locators }) => {
   const firstHrefBefore = await locators.productCard
     .nth(3)
@@ -131,6 +119,34 @@ test("Go to page and select product", async ({ page, locators }) => {
   await expect(locators.productCard.nth(3)).toBeVisible();
   await locators.productCard.nth(3).click();
 });
+test("Sort and select product", async ({ page, locators }) => {
+  await page.locator('[data-test="sort"]').click();
+  await page.locator('[data-test="sort"]').selectOption("price,desc");
+  const firstHrefBefore = await locators.productCard
+    .nth(3)
+    .getAttribute("href");
+  await expect(async () => {
+    const firstHrefAfter = await locators.productCard
+      .nth(3)
+      .getAttribute("href");
+    expect(firstHrefAfter).not.toBe(firstHrefBefore);
+  }).toPass();
+  const allProducts = locators.productName;
+  const productName = await allProducts.nth(6).innerText();
+  console.log(`Product : ${productName}`);
+  await expect(locators.productCard.nth(6)).toBeVisible();
+  await locators.productCard.nth(6).click();
+});
+test("Filter category using dropdown and click first result", async ({
+  page,
+  locators,
+}) => {
+  await locators.navCategories.click();
+  await locators.navRentals.click();
+  await expect(locators.pageTitle).toContainText("Rentals");
+  await locators.getFilterByText("Heavy-duty tracked excavator").click();
+  await expect(locators.productName).toBeVisible();
+});
 test("Click submit without filling contact form", async ({
   page,
   locators,
@@ -144,10 +160,7 @@ test("Click submit without filling contact form", async ({
   await expect(locators.getErrorMessage("Email is required")).toBeVisible();
   await expect(locators.subjectError).toContainText("Subject is required");
 });
-test("Contact Form - JSON", async ({
-  page,
-  locators,
-}) => {
+test("Contact Form - JSON", async ({ page, locators }) => {
   await locators.navContact.click();
   await locators.firstNameInput.fill(testDataJson.user1.firstName);
   await locators.lastNameInput.fill(testDataJson.user1.lastName);
@@ -156,12 +169,11 @@ test("Contact Form - JSON", async ({
   await locators.messageInput.fill(testDataJson.user1.message);
   await locators.fileInput.setInputFiles("tests/UploadFileTest.txt");
   await locators.contactSubmitButton.click();
-  await expect(page.getByRole('alert')).toContainText('Thanks for your message! We will contact you shortly.');
+  await expect(page.getByRole("alert")).toContainText(
+    "Thanks for your message! We will contact you shortly.",
+  );
 });
-test("Contact Form - TypeScript", async ({
-  page,
-  locators,
-}) => {
+test("Contact Form - TypeScript", async ({ page, locators }) => {
   await locators.navContact.click();
   await locators.firstNameInput.fill(loginCredentials.user1.firstName);
   await locators.lastNameInput.fill(loginCredentials.user1.lastName);
@@ -170,7 +182,9 @@ test("Contact Form - TypeScript", async ({
   await locators.messageInput.fill(loginCredentials.user1.message);
   await locators.fileInput.setInputFiles("tests/UploadFileTest.txt");
   await locators.contactSubmitButton.click();
-  await expect(page.getByRole('alert')).toContainText('Thanks for your message! We will contact you shortly.');
+  await expect(page.getByRole("alert")).toContainText(
+    "Thanks for your message! We will contact you shortly.",
+  );
 });
 test("Compare products", async ({ page, locators }) => {
   // wait for product cards to load
@@ -208,88 +222,78 @@ test("Compare products", async ({ page, locators }) => {
 test("Registration - JSON", async ({ page, locators }) => {
   await locators.navSignIn.click();
   await locators.registerLink.click();
-  await page
-    .locator('[data-test="first-name"]')
-    .fill(testDataJson.user1.firstName);
-  await page
-    .locator('[data-test="last-name"]')
-    .fill(testDataJson.user1.lastName);
+  
+  // Fill form
+  await page.locator('[data-test="first-name"]').fill(testDataJson.user1.firstName);
+  await page.locator('[data-test="last-name"]').fill(testDataJson.user1.lastName);
   await page.locator('[data-test="dob"]').fill(testDataJson.user1.dob);
-  await page
-    .locator('[data-test="postal_code"]')
-    .fill(testDataJson.user1.postalCode);
-  await page
-    .locator('[data-test="house_number"]')
-    .fill(testDataJson.user1.houseNo);
+  await page.locator('[data-test="postal_code"]').fill(testDataJson.user1.postalCode);
+  await page.locator('[data-test="house_number"]').fill(testDataJson.user1.houseNo);
   await page.locator('[data-test="phone"]').fill(testDataJson.user1.phone);
-  await page
-    .locator('[data-test="country"]')
-    .selectOption(testDataJson.user1.country);
-  const randomId = Math.random().toString(36).substring(2, 9);
-  testDataJson.user1.email = `johndoe+${randomId}@test.com`;
-  await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
-  await page
-    .locator('[data-test="password"]')
-    .fill(testDataJson.user1.password);
-
-  await page.waitForTimeout(5000);
-  //Submit
+  await page.locator('[data-test="country"]').selectOption(testDataJson.user1.country);
+  
+  // Wait for postal code validation to complete
+  await page.locator('[data-test="register-submit"]').isEnabled();
+  
+  // Generate random email and update test data
+  const randomId = Math.random().toString(36).substring(2, 8);
+  const testEmail = `johndoe${randomId}@test.com`;
+  testDataJson.user1.email = testEmail;
+  
+  // Fill email and password
+  await page.locator('[data-test="email"]').fill(testEmail);
+  await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
+  await page.waitForTimeout(1500); // Wait for password strength validation
+  
+  // Submit registration
   await page.locator('[data-test="register-submit"]').click();
-  //Login
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
-  await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
-  await page
-    .locator('[data-test="password"]')
-    .fill(testDataJson.user1.password);
-  await page.locator('[data-test="login-submit"]').click();
-  await page.waitForTimeout(2000);
-  await expect(page.locator('[data-test="page-title"]')).toContainText(
-    "My account",
-  );
-  await page.locator('[data-test="nav-menu"]').click();
-  await page.locator('[data-test="nav-sign-out"]').click();
-});
+  await page.waitForLoadState('networkidle');
+
+  // Login
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
+  await page.locator('[data-test="email"]').fill(testEmail);
+  await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
+  await page.waitForTimeout(1500); // Wait for password strength validation
+  
+  await page.locator('[data-test="
+
 test("Registration - TypeScript Data", async ({ page, locators }) => {
   await locators.navSignIn.click();
   await locators.registerLink.click();
-  await page
-    .locator('[data-test="first-name"]')
-    .fill(loginCredentials.user1.firstName);
-  await page
-    .locator('[data-test="last-name"]')
-    .fill(loginCredentials.user1.lastName);
+  
+  await page.locator('[data-test="first-name"]').fill(loginCredentials.user1.firstName);
+  await page.locator('[data-test="last-name"]').fill(loginCredentials.user1.lastName);
   await page.locator('[data-test="dob"]').fill(loginCredentials.user1.dob);
-  await page
-    .locator('[data-test="postal_code"]')
-    .fill(loginCredentials.user1.postalCode);
-  await page
-    .locator('[data-test="house_number"]')
-    .fill(loginCredentials.user1.houseNo);
+  await page.locator('[data-test="postal_code"]').fill(loginCredentials.user1.postalCode);
+  await page.locator('[data-test="house_number"]').fill(loginCredentials.user1.houseNo);
   await page.locator('[data-test="phone"]').fill(loginCredentials.user1.phone);
-  await page
-    .locator('[data-test="country"]')
-    .selectOption(loginCredentials.user1.country);
-  const randomId = Math.random().toString(36).substring(2, 9);
-  loginCredentials.user1.email = `johndoe+${randomId}@test.com`;
+  await page.locator('[data-test="country"]').selectOption(loginCredentials.user1.country);
+  
+  const randomId = Math.random().toString(36).substring(2, 5);
+  loginCredentials.user1.email = `johndoe${randomId}@hotmail.com`;
   await page.locator('[data-test="email"]').fill(loginCredentials.user1.email);
-  await page
-    .locator('[data-test="password"]')
-    .fill(loginCredentials.user1.password);
-
-  await page.waitForTimeout(5000);
-  //Submit
+  
+  // Wait for postal code address generation to complete
+  await page.locator('[data-test="register-submit"]').isEnabled();
+  
+  // Type password and wait for strength validation
+  await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password);
+  await page.waitForTimeout(1500); // Wait for strength gauge
+  
+  // Submit registration
   await page.locator('[data-test="register-submit"]').click();
-  //Login
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  
+  // Login
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
   await page.locator('[data-test="email"]').fill(loginCredentials.user1.email);
-  await page
-    .locator('[data-test="password"]')
-    .fill(loginCredentials.user1.password);
+  await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password);
+  
   await page.locator('[data-test="login-submit"]').click();
-  await page.waitForTimeout(2000);
-  await expect(page.locator('[data-test="page-title"]')).toContainText(
-    "My account",
-  );
+  await page.waitForLoadState('networkidle');
+  
+  await expect(page.locator('[data-test="page-title"]')).toContainText("My account", { timeout: 10000 });
+  
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
