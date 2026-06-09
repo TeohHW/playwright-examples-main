@@ -266,24 +266,28 @@ test("Registration - JSON", async ({ page, locators }) => {
   await page.waitForLoadState('networkidle');
   console.log("Form filled in");
 
-  await Promise.all([
-    page.waitForURL('**/auth/login', { timeout: 30000 }),
-    page.locator('[data-test="register-submit"]').click(),
-  ]);
+  await page.locator('[data-test="register-submit"]').click();
+  await page.waitForURL('**/auth/login', { timeout: 30000 });
   console.log("Redirect to login");
 
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('load');
+  await page.waitForLoadState('networkidle');
+  console.log("Current URL:", page.url());
+  const headingJson = await page.locator('h1, h2, h3').first().innerText().catch(() => 'no heading found');
+  console.log("Page heading found:", headingJson);
+
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
   await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 15000 });
 
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(testDataJson.user1.password);
 
-  await Promise.all([
-    page.waitForURL('**/account', { timeout: 30000 }),
-    page.locator('[data-test="login-submit"]').click(),
-  ]);
+  await page.locator('[data-test="login-submit"]').click();
+  await page.waitForURL('**/account', { timeout: 30000 });
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('load');
+  await page.waitForLoadState('networkidle');
   console.log("Account page");
 
   await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 15000 });
@@ -338,29 +342,28 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   await page.waitForLoadState('networkidle');
   console.log("Form filled - submit enabled");
 
-  await Promise.all([
-    page.waitForURL('**/auth/login', { timeout: 30000 }),
-    page.locator('[data-test="register-submit"]').click(),
-  ]);
+  await page.locator('[data-test="register-submit"]').click();
+  await page.waitForURL('**/auth/login', { timeout: 30000 });
   console.log("Redirected to login");
 
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('load');
-  // Log current URL and heading for debugging
+  await page.waitForLoadState('networkidle');
   console.log("Current URL:", page.url());
-  const heading = await page.locator('h1, h2, h3').first().innerText().catch(() => 'no heading found');
-  console.log("Page heading found:", heading);
-  
+  const headingTs = await page.locator('h1, h2, h3').first().innerText().catch(() => 'no heading found');
+  console.log("Page heading found:", headingTs);
+
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
   await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 15000 });
 
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(loginCredentials.user1.password);
 
-  await Promise.all([
-    page.waitForURL('**/account', { timeout: 30000 }),
-    page.locator('[data-test="login-submit"]').click(),
-  ]);
+  await page.locator('[data-test="login-submit"]').click();
+  await page.waitForURL('**/account', { timeout: 30000 });
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('load');
+  await page.waitForLoadState('networkidle');
   console.log("Account page");
 
   await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 15000 });
