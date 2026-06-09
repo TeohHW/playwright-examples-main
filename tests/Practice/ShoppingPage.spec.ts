@@ -222,30 +222,49 @@ test("Compare products", async ({ page, locators }) => {
 test("Registration - JSON", async ({ page, locators }) => {
   console.log("Able to hit page");
   await locators.navSignIn.click();
+  // Wait for login page to load before clicking register
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await locators.registerLink.click();
-  console.log("Registration page");
-  await page.locator('[data-test="first-name"]').fill(testDataJson.user1.firstName);
-  await page.locator('[data-test="last-name"]').fill(testDataJson.user1.lastName);
+  // Wait for registration form to load before filling fields
+  await expect(
+    page.getByRole("heading", { name: "Customer registration" }),
+  ).toBeVisible();
+  console.log("Registration page loaded");
+  await page
+    .locator('[data-test="first-name"]')
+    .fill(testDataJson.user1.firstName);
+  await page
+    .locator('[data-test="last-name"]')
+    .fill(testDataJson.user1.lastName);
   await page.locator('[data-test="dob"]').fill(testDataJson.user1.dob);
-  await page.locator('[data-test="postal_code"]').fill(testDataJson.user1.postalCode);
-  await page.locator('[data-test="house_number"]').fill(testDataJson.user1.houseNo);
+  await page
+    .locator('[data-test="postal_code"]')
+    .fill(testDataJson.user1.postalCode);
+  await page
+    .locator('[data-test="house_number"]')
+    .fill(testDataJson.user1.houseNo);
   await page.locator('[data-test="phone"]').fill(testDataJson.user1.phone);
-  await page.locator('[data-test="country"]').selectOption(testDataJson.user1.country);
+  await page
+    .locator('[data-test="country"]')
+    .selectOption(testDataJson.user1.country);
 
   const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
   await page.locator('[data-test="email"]').fill(uniqueEmail);
-
   await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
-  await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password, { delay: 200 });
+  await page
+    .locator('[data-test="password"]')
+    .pressSequentially(testDataJson.user1.password, { delay: 200 });
   console.log("Form filled in");
   await page.locator('[data-test="register-submit"]').click();
-  await page.waitForURL('**/auth/login');
+  await page.waitForURL("**/auth/login");
   console.log("Redirect to login");
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await page.locator('[data-test="email"]').fill(uniqueEmail);
-  await page.locator('[data-test="password"]').fill(testDataJson.user1.password);
+  await page
+    .locator('[data-test="password"]')
+    .fill(testDataJson.user1.password);
   await page.locator('[data-test="login-submit"]').click();
-  await page.waitForURL('**/account');
+  await page.waitForURL("**/account");
   console.log("Account page");
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
@@ -254,30 +273,50 @@ test("Registration - JSON", async ({ page, locators }) => {
 test("Registration - TypeScript Data", async ({ page, locators }) => {
   console.log("Able to hit page");
   await locators.navSignIn.click();
+  // Wait for login page to load before clicking register
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await locators.registerLink.click();
-  console.log("On Registration page");
-  await page.locator('[data-test="first-name"]').fill(loginCredentials.user1.firstName);
-  await page.locator('[data-test="last-name"]').fill(loginCredentials.user1.lastName);
+  // Wait for registration form to load before filling fields
+  await expect(
+    page.getByRole("heading", { name: "Customer registration" }),
+  ).toBeVisible();
+  console.log("Registration page loaded");
+  await page
+    .locator('[data-test="first-name"]')
+    .fill(loginCredentials.user1.firstName);
+  await page
+    .locator('[data-test="last-name"]')
+    .fill(loginCredentials.user1.lastName);
   await page.locator('[data-test="dob"]').fill(loginCredentials.user1.dob);
-  await page.locator('[data-test="postal_code"]').fill(loginCredentials.user1.postalCode);
-  await page.locator('[data-test="house_number"]').fill(loginCredentials.user1.houseNo);
+  await page
+    .locator('[data-test="postal_code"]')
+    .fill(loginCredentials.user1.postalCode);
+  await page
+    .locator('[data-test="house_number"]')
+    .fill(loginCredentials.user1.houseNo);
   await page.locator('[data-test="phone"]').fill(loginCredentials.user1.phone);
-  await page.locator('[data-test="country"]').selectOption(loginCredentials.user1.country);
+  await page
+    .locator('[data-test="country"]')
+    .selectOption(loginCredentials.user1.country);
 
   const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
   await page.locator('[data-test="email"]').fill(uniqueEmail);
 
   await expect(page.locator('[data-test="register-submit"]')).toBeEnabled();
-  await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password, { delay: 200 });
+  await page
+    .locator('[data-test="password"]')
+    .pressSequentially(loginCredentials.user1.password, { delay: 200 });
   console.log("Form filled in");
   await page.locator('[data-test="register-submit"]').click();
-  await page.waitForURL('**/auth/login');
+  await page.waitForURL("**/auth/login");
   console.log("Redirect to login");
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
   await page.locator('[data-test="email"]').fill(uniqueEmail);
-  await page.locator('[data-test="password"]').fill(loginCredentials.user1.password);
+  await page
+    .locator('[data-test="password"]')
+    .fill(loginCredentials.user1.password);
   await page.locator('[data-test="login-submit"]').click();
-  await page.waitForURL('**/account');
+  await page.waitForURL("**/account");
   console.log("Account page");
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
