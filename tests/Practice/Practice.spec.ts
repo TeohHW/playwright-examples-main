@@ -56,27 +56,32 @@ test("Checkboxes", async ({ page }) => {
   await expect(locators.checkboxElementOption2).toBeChecked();
   await expect(locators.checkboxElementOption3).toBeChecked();
 });
+test("Switch to new tab", async ({ page }) => {
+  const locators = new PracticeLocators(page);
+  const newTabPromise = page.waitForEvent("popup");
+  await locators.openTabLink.click();
+  const newTab = await newTabPromise;
+
+  await newTab.waitForLoadState('domcontentloaded');
+  console.log("New tab URL:", newTab.url());
+
+  // Check URL instead of page content since site may redirect on CI
+  await expect(newTab).toHaveURL(/qaclickacademy\.com/, { timeout: 15000 });
+  await newTab.close();
+});
 
 test("Switch to new window", async ({ page }) => {
   const locators = new PracticeLocators(page);
   const newWindowPromise = page.waitForEvent("popup");
   await locators.openWindowButton.click();
   const newWindow = await newWindowPromise;
-  await expect(newWindow.getByText("qaclickacademy.com")).toBeVisible();
-  await newWindow.close();
-});
 
-test("Switch to new tab", async ({ page }) => {
-  const locators = new PracticeLocators(page);
-  const newTabPromise = page.waitForEvent("popup");
-  await locators.openTabLink.click();
-  const newTab = await newTabPromise;
-  
-  // FIX: Added wait for load state to ensure page is fully loaded
-  await newTab.waitForLoadState('load');
-  
-  await expect(newTab.getByText("qaclickacademy.com")).toBeVisible({ timeout: 30000 });
-  await newTab.close();
+  await newWindow.waitForLoadState('domcontentloaded');
+  console.log("New window URL:", newWindow.url());
+
+  // Check URL instead of page content
+  await expect(newWindow).toHaveURL(/qaclickacademy\.com/, { timeout: 15000 });
+  await newWindow.close();
 });
 
 test("Hide and Show", async ({ page }) => {
