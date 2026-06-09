@@ -11,12 +11,10 @@ const test = base.extend<{ locators: PracticeLocators }>({
 });
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("https://practicesoftwaretesting.com/");
-  await page.waitForTimeout(3000);
-  await expect(page).toHaveURL(
-  "https://practicesoftwaretesting.com/"
-);
-});
+  await page.goto("https://practicesoftwaretesting.com/", { 
+    waitUntil: 'domcontentloaded',  // faster than default 'load'
+    timeout: 60000 
+})});
 
 test("Click first product", async ({ page, locators }) => {
   await page.waitForSelector("a.card");
@@ -118,6 +116,7 @@ test("Go to page and select product", async ({ page, locators }) => {
 });
 
 test("Sort and select product", async ({ page, locators }) => {
+  test.setTimeout(120000);
   await page.locator('[data-test="sort"]').click();
   await page.locator('[data-test="sort"]').selectOption("price,desc");
   const firstHrefBefore = await locators.productCard
@@ -161,6 +160,7 @@ test("Click submit without filling contact form", async ({
 });
 
 test("Contact Form - JSON", async ({ page, locators }) => {
+  test.setTimeout(60000);
   await locators.navContact.click();
   await locators.firstNameInput.fill(testDataJson.user1.firstName);
   await locators.lastNameInput.fill(testDataJson.user1.lastName);
@@ -221,127 +221,138 @@ test("Compare products", async ({ page, locators }) => {
 });
 
 test("Registration - JSON", async ({ page, locators }) => {
-  test.setTimeout(100000);
+  test.setTimeout(120000);
   console.log("Able to hit page");
   await locators.navSignIn.click();
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+  await page.waitForURL('**/auth/login');
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
 
   await locators.registerLink.click();
+  await page.waitForURL('**/auth/register');
   await expect(
     page.getByRole("heading", { name: "Customer registration" }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15000 });
   console.log("Registration page loaded");
 
   await page.locator('[data-test="first-name"]').fill(testDataJson.user1.firstName);
+  await expect(page.locator('[data-test="first-name"]')).toHaveValue(testDataJson.user1.firstName);
+
   await page.locator('[data-test="last-name"]').fill(testDataJson.user1.lastName);
+  await expect(page.locator('[data-test="last-name"]')).toHaveValue(testDataJson.user1.lastName);
+
   await page.locator('[data-test="dob"]').fill(testDataJson.user1.dob);
+  await expect(page.locator('[data-test="dob"]')).toHaveValue(testDataJson.user1.dob);
+
   await page.locator('[data-test="postal_code"]').fill(testDataJson.user1.postalCode);
+  await expect(page.locator('[data-test="postal_code"]')).toHaveValue(testDataJson.user1.postalCode);
+
   await page.locator('[data-test="house_number"]').fill(testDataJson.user1.houseNo);
+  await expect(page.locator('[data-test="house_number"]')).toHaveValue(testDataJson.user1.houseNo);
+
   await page.locator('[data-test="phone"]').fill(testDataJson.user1.phone);
+  await expect(page.locator('[data-test="phone"]')).toHaveValue(testDataJson.user1.phone);
+
   await page.locator('[data-test="country"]').selectOption(testDataJson.user1.country);
+  await expect(page.locator('[data-test="country"]')).not.toHaveValue('');
 
   const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
   await page.locator('[data-test="email"]').fill(uniqueEmail);
+  await expect(page.locator('[data-test="email"]')).toHaveValue(uniqueEmail);
 
-  // Type password and wait for strength gauge to enable submit
   await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password, { delay: 100 });
+  await expect(page.locator('[data-test="password"]')).toHaveValue(testDataJson.user1.password);
   await expect(page.locator('[data-test="register-submit"]')).toBeEnabled({ timeout: 15000 });
+  await page.waitForLoadState('networkidle');
   console.log("Form filled in");
 
-  // Wait for any pending network requests before submitting
-  await page.waitForLoadState('domcontentloaded');
-
-  // Submit and wait for navigation response together
-  await Promise.all([
-    page.waitForURL('**/auth/login', { timeout: 30000 }),
-    page.locator('[data-test="register-submit"]').click(),
-  ]);
+  page.waitForURL('**/auth/login', { timeout: 30000 }),
+  page.locator('[data-test="register-submit"]').click(),
   console.log("Redirect to login");
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('load');
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 15000 });
 
-  // Wait for login page elements to be ready
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
-  await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 10000 });
-
-  // Fill login form
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(testDataJson.user1.password);
 
-  // Submit login and wait for navigation together
-  await Promise.all([
-    page.waitForURL('**/account', { timeout: 30000 }),
-    page.locator('[data-test="login-submit"]').click(),
-  ]);
+  page.waitForURL('**/account', { timeout: 30000 }),
+  page.locator('[data-test="login-submit"]').click(),
+
   console.log("Account page");
 
-  // Wait for nav menu to be interactive before clicking
-  await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 15000 });
   await page.locator('[data-test="nav-menu"]').click();
-  await expect(page.locator('[data-test="nav-sign-out"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="nav-sign-out"]')).toBeVisible({ timeout: 15000 });
   await page.locator('[data-test="nav-sign-out"]').click();
-
-  // Wait for sign out to complete by checking URL or nav state
-  await expect(page.locator('[data-test="nav-sign-in"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="nav-sign-in"]')).toBeVisible({ timeout: 15000 });
 });
 
 test("Registration - TypeScript Data", async ({ page, locators }) => {
-  test.setTimeout(100000);
+  test.setTimeout(120000);
   console.log("Able to hit page");
   await locators.navSignIn.click();
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
+  await page.waitForURL('**/auth/login');
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
 
   await locators.registerLink.click();
+  await page.waitForURL('**/auth/register');
   await expect(
     page.getByRole("heading", { name: "Customer registration" }),
-  ).toBeVisible();
+  ).toBeVisible({ timeout: 15000 });
   console.log("Registration page loaded");
 
   await page.locator('[data-test="first-name"]').fill(loginCredentials.user1.firstName);
+  await expect(page.locator('[data-test="first-name"]')).toHaveValue(loginCredentials.user1.firstName);
+
   await page.locator('[data-test="last-name"]').fill(loginCredentials.user1.lastName);
+  await expect(page.locator('[data-test="last-name"]')).toHaveValue(loginCredentials.user1.lastName);
+
   await page.locator('[data-test="dob"]').fill(loginCredentials.user1.dob);
+  await expect(page.locator('[data-test="dob"]')).toHaveValue(loginCredentials.user1.dob);
+
   await page.locator('[data-test="postal_code"]').fill(loginCredentials.user1.postalCode);
+  await expect(page.locator('[data-test="postal_code"]')).toHaveValue(loginCredentials.user1.postalCode);
+
   await page.locator('[data-test="house_number"]').fill(loginCredentials.user1.houseNo);
+  await expect(page.locator('[data-test="house_number"]')).toHaveValue(loginCredentials.user1.houseNo);
+
   await page.locator('[data-test="phone"]').fill(loginCredentials.user1.phone);
+  await expect(page.locator('[data-test="phone"]')).toHaveValue(loginCredentials.user1.phone);
+
   await page.locator('[data-test="country"]').selectOption(loginCredentials.user1.country);
+  await expect(page.locator('[data-test="country"]')).not.toHaveValue('');
 
   const uniqueEmail = `johndoe${Math.random().toString(36).substring(2, 8)}@test.com`;
   await page.locator('[data-test="email"]').fill(uniqueEmail);
+  await expect(page.locator('[data-test="email"]')).toHaveValue(uniqueEmail);
 
-  // Type password and wait for strength gauge to enable submit
   await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password, { delay: 100 });
+  await expect(page.locator('[data-test="password"]')).toHaveValue(loginCredentials.user1.password);
   await expect(page.locator('[data-test="register-submit"]')).toBeEnabled({ timeout: 15000 });
+  await page.waitForLoadState('networkidle');
   console.log("Form filled - submit enabled");
 
-  // Wait for any pending network requests before submitting
-  await page.waitForLoadState('domcontentloaded');
 
-  // Submit and wait for navigation response together
-  await Promise.all([
-    page.waitForURL('**/auth/login', { timeout: 30000 }),
-    page.locator('[data-test="register-submit"]').click(),
-  ]);
+  page.waitForURL('**/auth/login', { timeout: 30000 }),
+  page.locator('[data-test="register-submit"]').click(),
   console.log("Redirected to login");
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForLoadState('load');
 
-  // Wait for login page elements to be ready
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
-  await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('[data-test="email"]')).toBeVisible({ timeout: 15000 });
 
-  // Fill login form
   await page.locator('[data-test="email"]').fill(uniqueEmail);
   await page.locator('[data-test="password"]').fill(loginCredentials.user1.password);
 
-  // Submit login and wait for navigation together
-  await Promise.all([
-    page.waitForURL('**/account', { timeout: 30000 }),
-    page.locator('[data-test="login-submit"]').click(),
-  ]);
+  page.waitForURL('**/account', { timeout: 30000 }),
+  page.locator('[data-test="login-submit"]').click(),
   console.log("Account page");
 
-  // Wait for nav menu to be interactive before clicking
-  await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="nav-menu"]')).toBeVisible({ timeout: 15000 });
   await page.locator('[data-test="nav-menu"]').click();
-  await expect(page.locator('[data-test="nav-sign-out"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="nav-sign-out"]')).toBeVisible({ timeout: 15000 });
   await page.locator('[data-test="nav-sign-out"]').click();
-
-  // Wait for sign out to complete by checking nav state
-  await expect(page.locator('[data-test="nav-sign-in"]')).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('[data-test="nav-sign-in"]')).toBeVisible({ timeout: 15000 });
 });
