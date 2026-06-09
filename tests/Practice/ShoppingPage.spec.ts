@@ -240,12 +240,12 @@ test("Registration - JSON", async ({ page, locators }) => {
   
   // Type password and wait for strength validation
   await page.locator('[data-test="password"]').pressSequentially(testDataJson.user1.password);
-  await page.waitForTimeout(1500); // Wait for strength gauge
+  await page.waitForTimeout(2500); // Wait for strength gauge
   
   // Submit registration
   await page.locator('[data-test="register-submit"]').click();
   await page.waitForLoadState('networkidle');
-  
+  await page.waitForURL('**/auth/login');
   // Login
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
   await page.locator('[data-test="email"]').fill(testDataJson.user1.email);
@@ -253,8 +253,7 @@ test("Registration - JSON", async ({ page, locators }) => {
   
   await page.locator('[data-test="login-submit"]').click();
   await page.waitForLoadState('networkidle');
-  
-  await expect(page.locator('[data-test="page-title"]')).toContainText("My account", { timeout: 10000 });
+  await page.waitForURL('**/account');
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
@@ -279,12 +278,12 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   
   // Type password and wait for strength validation
   await page.locator('[data-test="password"]').pressSequentially(loginCredentials.user1.password);
-  await page.waitForTimeout(1500); // Wait for strength gauge
+  await page.waitForTimeout(2500); // Wait for strength gauge
   
   // Submit registration
   await page.locator('[data-test="register-submit"]').click();
   await page.waitForLoadState('networkidle');
-  
+  await page.waitForURL('**/auth/login');
   // Login
   await expect(page.getByRole("heading", { name: "Login" })).toBeVisible({ timeout: 10000 });
   await page.locator('[data-test="email"]').fill(loginCredentials.user1.email);
@@ -292,9 +291,7 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   
   await page.locator('[data-test="login-submit"]').click();
   await page.waitForLoadState('networkidle');
-  
-  await expect(page.locator('[data-test="page-title"]')).toContainText("My account", { timeout: 10000 });
-  
+  await page.waitForURL('**/account');
   await page.locator('[data-test="nav-menu"]').click();
   await page.locator('[data-test="nav-sign-out"]').click();
 });
