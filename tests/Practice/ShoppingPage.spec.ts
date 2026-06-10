@@ -2,7 +2,7 @@ import { test as base, expect, type Page } from "@playwright/test";
 import { PracticeLocators } from "../../Pages/locators";
 import testDataJson from "../../TestData/SearchFilters.json";
 import { loginCredentials } from "../../TestData/SearchFilters";
-
+declare const process: any;
 const test = base.extend<{ locators: PracticeLocators }>({
   locators: async ({ page }, use) => {
     const locators = new PracticeLocators(page);
@@ -229,6 +229,7 @@ test("Compare products", async ({ page, locators }) => {
 });
 
 test("Registration - JSON", async ({ page, locators }) => {
+  test.skip(!!process.env.CI, 'Skipping on CI - security verification required');
   test.setTimeout(200000);
   console.log("Able to hit page");
   await locators.navSignIn.click();
@@ -307,6 +308,7 @@ test("Registration - JSON", async ({ page, locators }) => {
 });
 
 test("Registration - TypeScript Data", async ({ page, locators }) => {
+  test.skip(!!process.env.CI, 'Skipping on CI - security verification required');
   test.setTimeout(200000);
   console.log("Able to hit page");
   await locators.navSignIn.click();
