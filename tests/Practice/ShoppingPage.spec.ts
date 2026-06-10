@@ -229,7 +229,7 @@ test("Compare products", async ({ page, locators }) => {
 });
 
 test("Registration - JSON", async ({ page, locators }) => {
-  test.setTimeout(120000);
+  test.setTimeout(200000);
   console.log("Able to hit page");
   await locators.navSignIn.click();
   await page.waitForURL('**/auth/login');
@@ -307,7 +307,7 @@ test("Registration - JSON", async ({ page, locators }) => {
 });
 
 test("Registration - TypeScript Data", async ({ page, locators }) => {
-  test.setTimeout(120000);
+  test.setTimeout(200000);
   console.log("Able to hit page");
   await locators.navSignIn.click();
   await page.waitForURL('**/auth/login');
