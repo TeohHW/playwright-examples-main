@@ -385,3 +385,83 @@ test("Registration - TypeScript Data", async ({ page, locators }) => {
   await page.locator('[data-test="nav-sign-out"]').click();
   await expect(page.locator('[data-test="nav-sign-in"]')).toBeVisible({ timeout: 15000 });
 });
+
+test("Delete item from cart", async ({ page, locators }) => {
+  await page.waitForSelector("a.card");
+  await expect(locators.productCard.first()).toBeVisible();
+  await locators.productCard.first().click();
+  await expect(page).toHaveURL(/\/product\//);
+
+  await page.locator('[data-test="add-to-cart"]').click();
+  await expect(page.locator('div').filter({ hasText: 'Product added to shopping' }).nth(2)).toBeVisible();
+  
+  await page.locator('[data-test="nav-cart"]').click();
+  await expect(page).toHaveURL(/checkout/);;
+  await page.locator('.btn.btn-danger').click();
+  await expect(page.getByRole('alert', { name: 'Product deleted.' })).toBeVisible();
+  await expect(page.locator('aw-wizard')).toContainText('The cart is empty. Nothing to display.');
+});  
+test("Purchase first product", async ({ page, locators }) => {
+  await page.waitForSelector("a.card");
+  await expect(locators.productCard.first()).toBeVisible();
+  await locators.productCard.first().click();
+  await expect(page).toHaveURL(/\/product\//);
+
+  await page.locator('[data-test="add-to-cart"]').click();
+  await expect(page.locator('div').filter({ hasText: 'Product added to shopping' }).nth(2)).toBeVisible();
+  await page.locator('[data-test="nav-cart"]').click();
+  await expect(page).toHaveURL(/checkout/);
+
+  await page.locator('[data-test="proceed-1"]').click();
+  await page.getByRole('tab', { name: 'Continue as Guest' }).click();
+  await page.locator('[data-test="guest-email"]').click();
+  await page.locator('[data-test="guest-email"]').fill('test@test.com');
+  await page.locator('[data-test="guest-email"]').press('Tab');
+  await page.locator('[data-test="guest-first-name"]').fill('John');
+  await page.locator('[data-test="guest-first-name"]').press('Tab');
+  await page.locator('[data-test="guest-last-name"]').fill('Doe');
+  await page.locator('[data-test="guest-submit"]').click();
+  await page.locator('[data-test="proceed-2-guest"]').click();
+  await page.locator('[data-test="country"]').selectOption('SG');
+  await page.locator('[data-test="postal_code"]').click();
+  await page.locator('[data-test="postal_code"]').fill('12345');
+  await page.locator('[data-test="house_number"]').click();
+  await page.locator('[data-test="house_number"]').fill('123');
+  
+  
+  await expect(page.locator('[data-test="street"]')).not.toBeEmpty();
+  await page.locator('[data-test="proceed-3"]').click();
+  await page.locator('[data-test="payment-method"]').selectOption('credit-card');
+  
+  function generateMockCreditCard(): string {
+  const parts: string[] = [];
+  
+  for (let i = 0; i < 4; i++) {
+    // Generates a 4-digit number between 1000 and 9999
+    const block = Math.floor(1000 + Math.random() * 9000).toString();
+    parts.push(block);
+  }
+  
+  return parts.join('-');
+}
+  const testCard = generateMockCreditCard();
+ // 2. Generate Month (01 to 12)
+  const month = Math.floor(1 + Math.random() * 12).toString().padStart(2, '0');
+  // 3. Generate 4-Digit Year (1 to 5 years in the future from 2026)
+  const currentYearFull = 2026; 
+  const yearNum = currentYearFull + Math.floor(1 + Math.random() * 5);
+  const year = yearNum.toString();
+  const expiryDate = `${month}/${year}`
+  const cvvNum = Math.floor(100 + Math.random() * 900);
+  const cvv = cvvNum.toString();
+
+
+  await page.locator('[data-test="credit_card_number"]').fill(testCard);
+  await page.locator('[data-test="expiration_date"]').fill(expiryDate);
+  await page.locator('[data-test="cvv"]').fill(cvv);
+  await page.locator('[data-test="card_holder_name"]').fill('John Doe');
+  await page.locator('[data-test="finish"]').click();
+  await expect(page.locator('app-payment')).toContainText('Payment was successful');
+  await page.locator('[data-test="finish"]').click();
+  await expect(page.getByText('Thanks for your order! Your')).toBeVisible();
+});
